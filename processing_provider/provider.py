@@ -1,12 +1,14 @@
 from qgis.core import QgsProcessingProvider
+from .SnapSegViaRodovCurvaDeNivel import SnapSegViaRodovCurvaDeNivel
 
-from .example_processing_algorithm import ExampleProcessingAlgorithm
+
 
 
 class Provider(QgsProcessingProvider):
 
     def loadAlgorithms(self, *args, **kwargs):
-        self.addAlgorithm(ExampleProcessingAlgorithm())
+        self.addAlgorithm(SnapSegViaRodovCurvaDeNivel())
+
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
 
@@ -16,7 +18,7 @@ class Provider(QgsProcessingProvider):
         This string should be a unique, short, character only string,
         eg "qgis" or "gdal". This string should not be localised.
         """
-        return 'yourplugin'
+        return 'geoglobalrecarttools'
 
     def name(self, *args, **kwargs):
         """The human friendly name of your plugin in Processing.
@@ -24,7 +26,7 @@ class Provider(QgsProcessingProvider):
         This string should be as short as possible (e.g. "Lastools", not
         "Lastools version 1.0.1 64-bit") and localised.
         """
-        return self.tr('Your plugin')
+        return self.tr('Geoglobal Recart Tools')
 
     def icon(self):
         """Should return a QIcon which is used for your provider inside
