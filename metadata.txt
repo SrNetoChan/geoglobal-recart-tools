@@ -1,0 +1,9 @@
+[general]
+name=Geoglobal Recart tools
+description=Ferramentas de controlo de qualidade para bases de dados Recart
+version=0.1
+qgisMinimumVersion=3.0
+author=Alexandre Neto (for Geoglobal)
+email=alex.f.neto@gmail.com
+hasProcessingProvider=yes
+tags=carttop, PostgreSQL, PostGIS, ReCart, Processing
