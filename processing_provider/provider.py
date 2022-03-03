@@ -1,5 +1,6 @@
 from qgis.core import QgsProcessingProvider
 from .SnapSegViaRodovCurvaDeNivel import SnapSegViaRodovCurvaDeNivel
+from .SnapViaRodovLimiteCurvaDeNivel import SnapViaRodovLimiteCurvaDeNivel
 
 
 
@@ -8,6 +9,7 @@ class Provider(QgsProcessingProvider):
 
     def loadAlgorithms(self, *args, **kwargs):
         self.addAlgorithm(SnapSegViaRodovCurvaDeNivel())
+        self.addAlgorithm(SnapViaRodovLimiteCurvaDeNivel())
 
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
