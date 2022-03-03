@@ -1,24 +1,35 @@
-from qgis.core import QgsProcessing
-from qgis.core import QgsProcessingAlgorithm
-from qgis.core import QgsProcessingMultiStepFeedback
-from qgis.core import QgsProcessingParameterEnum
-import processing
-import os
-from .utils import get_postgres_connections
+from qgis.PyQt.QtCore import QCoreApplication
+from qgis.core import (QgsProcessing,
+                       QgsProcessingAlgorithm,
+                       QgsProcessingMultiStepFeedback,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterProviderConnection)
+import processing, os
+
 
 class SnapSegViaRodovCurvaDeNivel(QgsProcessingAlgorithm):
 
-    POSTGRES_CONNECTION = 'POSTGRES_CONNECTION'
+    # Constants used to refer to parameters and outputs. They will be
+    # used when calling the algorithm from another algorithm, or when
+    # calling from the QGIS console.
+
+    LIGACAO_RECART = 'LIGACAO_RECART'
+    SUBSTITUIR_BACKUP = 'SUBSTITUIR_BACKUP'
 
     def initAlgorithm(self, config=None):
-        self.postgres_connections_list = get_postgres_connections()
+        self.addParameter(
+            QgsProcessingParameterProviderConnection(
+                self.LIGACAO_RECART,
+                'Ligação PostgreSQL',
+                'postgres',
+                defaultValue=None
+            )
+        )
 
         self.addParameter(
-            QgsProcessingParameterEnum(
-                self.POSTGRES_CONNECTION,
-                'Ligação PostgreSQL',
-                self.postgres_connections_list,
-                defaultValue = 0
+            QgsProcessingParameterBoolean(
+                self.SUBSTITUIR_BACKUP,
+                'Substituir backup existente (CUIDADO!!)'
             )
         )
 
@@ -29,14 +40,8 @@ class SnapSegViaRodovCurvaDeNivel(QgsProcessingAlgorithm):
         results = {}
         outputs = {}
 
-        # Available connections
-        idx = self.parameterAsEnum(
-            parameters,
-            self.POSTGRES_CONNECTION,
-            context
-            )
-
-        postgres_connection = self.postgres_connections_list[idx]
+        ligacao_recart = parameters[self.LIGACAO_RECART]
+        substituir_backup = parameters[self.SUBSTITUIR_BACKUP]
 
         script_path = os.path.dirname(os.path.realpath(__file__))
         sql_path = os.path.join(script_path, 'SnapSegViaRodovCurvaDeNivel.sql')
@@ -46,9 +51,20 @@ class SnapSegViaRodovCurvaDeNivel(QgsProcessingAlgorithm):
 
         sql_command = base_sql
 
+        # Delete backup table
+        if substituir_backup:
+            # PostgreSQL execute SQL
+            alg_params = {
+                'DATABASE': ligacao_recart,
+                'SQL': '''DROP TABLE IF EXISTS backup.seg_via_rodov_bk;
+                          DROP TABLE IF EXISTS backup.curva_de_nivel_;'''
+            }
+            outputs['PostgresqlExecuteSql'] = processing.run('qgis:postgisexecutesql', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+
         # PostgreSQL execute SQL
         alg_params = {
-            'DATABASE': postgres_connection,
+            'DATABASE': ligacao_recart,
             'SQL': sql_command
         }
         outputs['PostgresqlExecuteSql'] = processing.run('qgis:postgisexecutesql', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
@@ -56,38 +72,6 @@ class SnapSegViaRodovCurvaDeNivel(QgsProcessingAlgorithm):
         feedback.setCurrentStep(1)
         if feedback.isCanceled():
             return {}
-
-
-        # PostgreSQL execute and load SQL
-        alg_params = {
-            'DATABASE': postgres_connection,
-            'GEOMETRY_FIELD': 'geometria',
-            'ID_FIELD': 'identificador',
-            'SQL': 'SELECT * FROM temp.seg_via_rodov_temp;'
-        }
-        outputs['PostgresqlExecuteAndLoadSql'] = processing.run('qgis:postgisexecuteandloadsql', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        alg_params = {
-            'INPUT': outputs['PostgresqlExecuteAndLoadSql']['OUTPUT'],
-            'NAME': 'seg_via_rodov_snap_curvas'
-        }
-        
-        outputs['LoadLayerIntoProject'] = processing.run('native:loadlayer', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        alg_params = {
-            'DATABASE': postgres_connection,
-            'GEOMETRY_FIELD': 'geometria',
-            'ID_FIELD': 'identificador',
-            'SQL': 'SELECT * FROM temp.curva_de_nivel_temp;'
-        }
-        outputs['PostgresqlExecuteAndLoadSql'] = processing.run('qgis:postgisexecuteandloadsql', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
-        alg_params = {
-            'INPUT': outputs['PostgresqlExecuteAndLoadSql']['OUTPUT'],
-            'NAME': 'curvas_de_nivel_snap_seg_vias_rodov_temp'
-        }
-        
-        outputs['LoadLayerIntoProject'] = processing.run('native:loadlayer', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
         return results
 
@@ -105,3 +89,16 @@ class SnapSegViaRodovCurvaDeNivel(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return SnapSegViaRodovCurvaDeNivel()
+
+    def tr(self, string):
+        """
+        Returns a translatable string with the self.tr() function.
+        """
+        return QCoreApplication.translate('Processing', string)
+
+    def shortHelpString(self):
+        return self.tr(
+            "<p>Cria vértices comuns em 3D em intersecções espaciais com curvas de nível</p>"
+            "<p><b>ATENÇÃO:</b> Esta ferramenta altera directamente as tabelas seg_via_rodov e curva_de_nivel, sendo criados backups no schema backups</p>"
+            "<p><b>CUIDADO!:</b> Se a opção Substituir backup existente for usada, não existe forma de recuperar os dados originais!</p>"
+                       )
