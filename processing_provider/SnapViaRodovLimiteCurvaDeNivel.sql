@@ -21,6 +21,8 @@ CREATE INDEX IF NOT EXISTS curva_de_nivel_geometria_idx ON curva_de_nivel USING 
 
 /* Criar tabela com pontos de intersecção entre as camadas para fazer snapping às camadas originais */
 
+CREATE SCHEMA IF NOT EXISTS temp;
+
 DROP TABLE temp.snap_points;
 CREATE TABLE temp.snap_points as
 SELECT vrl.identificador, 
