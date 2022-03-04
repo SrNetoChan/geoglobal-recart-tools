@@ -24,7 +24,7 @@ CREATE INDEX IF NOT EXISTS curva_de_nivel_geometria_idx ON curva_de_nivel USING 
 
 CREATE SCHEMA IF NOT EXISTS temp;
 
-DROP TABLE temp.snap_points;
+DROP TABLE IF EXISTS temp.snap_points;
 CREATE TABLE temp.snap_points as
 SELECT cdaa.identificador, 
 	cdn.identificador AS cdn_identificador, 
@@ -68,3 +68,5 @@ UPDATE curva_de_nivel AS cdnt SET
 geometria = st_snap(cdnt.geometria, sc.geometria, 0.01)
 FROM points_collect AS sc
 WHERE cdnt.identificador = sc.cdn_identificador;
+
+DROP SCHEMA IF EXISTS temp cascade;

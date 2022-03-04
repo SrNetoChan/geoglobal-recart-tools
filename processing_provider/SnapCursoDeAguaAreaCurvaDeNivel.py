@@ -79,7 +79,7 @@ class SnapCursoDeAguaAreaCurvaDeNivel(QgsProcessingAlgorithm):
         return 'SnapCursoDeAguaAreaCurvaDeNivel'
 
     def displayName(self):
-        return 'Snap Curso de Água Eixo a curvas de nível'
+        return 'Snap Curso de Água Área a curvas de nível'
 
     def group(self):
         return 'Correção'
