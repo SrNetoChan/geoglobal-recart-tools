@@ -7,7 +7,7 @@ from qgis.core import (QgsProcessing,
 import processing, os
 
 
-class SnapLinhaDeQuebraCurvaDeNivel(QgsProcessingAlgorithm):
+class SnapCursoDeAguaEixoCurvaDeNivel(QgsProcessingAlgorithm):
 
     # Constants used to refer to parameters and outputs. They will be
     # used when calling the algorithm from another algorithm, or when
@@ -44,7 +44,7 @@ class SnapLinhaDeQuebraCurvaDeNivel(QgsProcessingAlgorithm):
         substituir_backup = parameters[self.SUBSTITUIR_BACKUP]
 
         script_path = os.path.dirname(os.path.realpath(__file__))
-        sql_path = os.path.join(script_path, 'SnapLinhaDeQuebraCurvaDeNivel.sql')
+        sql_path = os.path.join(script_path, 'SnapCursoDeAguaEixoCurvaDeNivel.sql')
 
         with open(sql_path) as f:
             base_sql = f.read()
@@ -56,7 +56,7 @@ class SnapLinhaDeQuebraCurvaDeNivel(QgsProcessingAlgorithm):
             # PostgreSQL execute SQL
             alg_params = {
                 'DATABASE': ligacao_recart,
-                'SQL': '''DROP TABLE IF EXISTS backup.linha_de_quebra_bk;
+                'SQL': '''DROP TABLE IF EXISTS backup.curso_de_agua_eixo_bk;
                           DROP TABLE IF EXISTS backup.curva_de_nivel_bk;'''
             }
             outputs['PostgresqlExecuteSql'] = processing.run('qgis:postgisexecutesql', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
@@ -76,10 +76,10 @@ class SnapLinhaDeQuebraCurvaDeNivel(QgsProcessingAlgorithm):
         return results
 
     def name(self):
-        return 'SnapLinhaDeQuebraCurvaDeNivel'
+        return 'SnapCursoDeAguaEixoCurvaDeNivel'
 
     def displayName(self):
-        return 'Snap linhas de quebra a curvas de nível'
+        return 'Snap Curso de Água Eixo a curvas de nível'
 
     def group(self):
         return 'Correção'
@@ -88,7 +88,7 @@ class SnapLinhaDeQuebraCurvaDeNivel(QgsProcessingAlgorithm):
         return 'Correcao'
 
     def createInstance(self):
-        return SnapLinhaDeQuebraCurvaDeNivel()
+        return SnapCursoDeAguaEixoCurvaDeNivel()
 
     def tr(self, string):
         """
@@ -99,6 +99,6 @@ class SnapLinhaDeQuebraCurvaDeNivel(QgsProcessingAlgorithm):
     def shortHelpString(self):
         return self.tr(
             "<p>Cria vértices comuns em 3D em intersecções espaciais com curvas de nível</p>"
-            "<p><b>ATENÇÃO:</b> Esta ferramenta altera directamente as tabelas linha_de_quebra e curva_de_nivel, sendo criados backups no schema backups</p>"
+            "<p><b>ATENÇÃO:</b> Esta ferramenta altera directamente as tabelas curso_de_agua_eixo e curva_de_nivel, sendo criados backups no schema backups</p>"
             "<p><b>CUIDADO!:</b> Se a opção Substituir backup existente for usada, não existe forma de recuperar os dados originais!</p>"
                        )
