@@ -4,6 +4,7 @@ from .SnapViaRodovLimiteCurvaDeNivel import SnapViaRodovLimiteCurvaDeNivel
 from .SnapLinhaDeQuebraCurvaDeNivel import SnapLinhaDeQuebraCurvaDeNivel
 from .SnapCursoDeAguaEixoCurvaDeNivel import SnapCursoDeAguaEixoCurvaDeNivel
 from .SnapCursoDeAguaAreaCurvaDeNivel import SnapCursoDeAguaAreaCurvaDeNivel
+from .CriarLigacaoViaRodovLimiteSegViaRodov import CriarLigacaoViaRodovLimiteSegViaRodov
 
 
 
@@ -16,6 +17,7 @@ class Provider(QgsProcessingProvider):
         self.addAlgorithm(SnapLinhaDeQuebraCurvaDeNivel())
         self.addAlgorithm(SnapCursoDeAguaEixoCurvaDeNivel())
         self.addAlgorithm(SnapCursoDeAguaAreaCurvaDeNivel())
+        self.addAlgorithm(CriarLigacaoViaRodovLimiteSegViaRodov())
 
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
