@@ -23,7 +23,7 @@ CREATE INDEX ON TEMP.via_rodov_limite USING gist(geometria);
 DROP TABLE IF EXISTS TEMP.noded_lines;
 
 WITH all_lines AS (
-SELECT (st_dump(geom)).geom AS geom FROM TEMP.CONNECTION_road
+SELECT st_force2d((st_dump(geom)).geom) AS geom FROM TEMP.CONNECTION_road
 UNION ALL
 SELECT ST_SnapToGrid(st_force2d(geometria), 0.001) AS geom FROM TEMP.seg_via_rodov
 UNION ALL
