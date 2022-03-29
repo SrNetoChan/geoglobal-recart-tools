@@ -124,6 +124,27 @@ class CriarLigacaoViaRodovLimiteSegViaRodov(QgsProcessingAlgorithm):
         
         outputs['LoadLayerIntoProject'] = processing.run('native:loadlayer', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
 
+        # PostgreSQL execute and load SQL
+        alg_params = {
+            'DATABASE': postgres_connection,
+            'GEOMETRY_FIELD': 'geometria',
+            'ID_FIELD': 'identificador',
+            'SQL': 'SELECT * FROM TEMP.limites_nao_ligados;'
+        }
+        outputs['PostgresqlExecuteAndLoadSql'] = processing.run('qgis:postgisexecuteandloadsql', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+        feedback.setCurrentStep(5)
+        if feedback.isCanceled():
+            return {}
+
+        alg_params = {
+            'INPUT': outputs['PostgresqlExecuteAndLoadSql']['OUTPUT'],
+            'NAME': 'temp_limites_nao_ligados'
+        }
+        
+        outputs['LoadLayerIntoProject'] = processing.run('native:loadlayer', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+
+
         return results
 
     def name(self):

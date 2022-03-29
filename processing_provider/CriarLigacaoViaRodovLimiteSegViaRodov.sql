@@ -64,6 +64,14 @@ WHERE
 CREATE INDEX ON TEMP.lig_segviarodov_viarodovlimite USING gist(geom);
 CREATE INDEX ON TEMP.lig_segviarodov_viarodovlimite(via_rodov_limite_id);
 
+DROP TABLE IF EXISTS TEMP.limites_nao_ligados;
+SELECT * 
+INTO TEMP.limites_nao_ligados
+FROM via_rodov_limite vrl
+WHERE NOT EXISTS (SELECT 1 FROM temp.lig_segviarodov_viarodovlimite WHERE via_rodov_limite_id = vrl.identificador);
+
+CREATE INDEX ON TEMP.limites_nao_ligados USING gist(geometria);
+
 /* Limpar tabelas temporárias */
 DROP TABLE IF EXISTS TEMP.noded_lines;
 DROP TABLE IF EXISTS TEMP.ALL_polygons;
